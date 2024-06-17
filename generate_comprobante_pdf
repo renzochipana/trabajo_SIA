@@ -1,0 +1,124 @@
+from datetime import datetime
+from decimal import Decimal
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from reportlab.lib import colors
+
+class Comprobante:
+    def __init__(self, idcomprobante, fecha_emision, pago_total, idoperacion, idcuenta, idbanco, idcliente):
+        self.idcomprobante = idcomprobante
+        self.fecha_emision = fecha_emision
+        self.pago_total = pago_total
+        self.idoperacion = idoperacion
+        self.idcuenta = idcuenta
+        self.idbanco = idbanco
+        self.idcliente = idcliente
+
+class Cuenta:
+    def __init__(self, idcuenta, num_ero_cuenta, tipo_moneda, tipo_cuenta, idcliente, idbanco):
+        self.idcuenta = idcuenta
+        self.num_ero_cuenta = num_ero_cuenta
+        self.tipo_moneda = tipo_moneda
+        self.tipo_cuenta = tipo_cuenta
+        self.idcliente = idcliente
+        self.idbanco = idbanco
+
+class Persona:
+    def __init__(self, idpersona, apaterno, amaterno, tipo_documento, num_ero_documento, direccion, telefono, email):
+        self.idpersona = idpersona
+        self.apaterno = apaterno
+        self.amaterno = amaterno
+        self.tipo_documento = tipo_documento
+        self.num_ero_documento = num_ero_documento
+        self.direccion = direccion
+        self.telefono = telefono
+        self.email = email
+
+class Banco:
+    def __init__(self, idbanco, nombre, direccion):
+        self.idbanco = idbanco
+        self.nombre = nombre
+        self.direccion = direccion
+
+class Operacion:
+    def __init__(self, idoperacion, descripcion):
+        self.idoperacion = idoperacion
+        self.descripcion = descripcion
+
+def generate_comprobante_pdf(comprobante, cuenta, persona, banco, operacion, file_path):
+    c = canvas.Canvas(file_path, pagesize=letter)
+    
+    # Título del banco en el encabezado
+    c.setFont("Helvetica-Bold", 16)
+    c.setFillColorRGB(0, 0, 0)  # Color negro para el texto
+    c.drawCentredString(300, 750, f"Banco: {banco.nombre}")
+    
+    # Cuadro azul con el nombre "Comprobante de Abono"
+    c.setFillColor(colors.HexColor('#2c3e50'))  # Color azul (código hex #2c3e50)
+    c.setStrokeColorRGB(0, 0, 0)  # Borde negro
+    c.rect(50, 680, 500, 40, fill=True)
+    c.setFillColor(colors.HexColor('#ffffff'))  # Color blanco para el texto
+    c.setFont("Helvetica-Bold", 20)
+    c.drawCentredString(300, 690, "Comprobante de Abono")
+    
+    # Detalles del comprobante
+    c.setFont("Helvetica", 12)
+    c.setFillColorRGB(0, 0, 0)  # Texto negro
+    
+    # Fecha de Emisión
+    c.drawString(50, 640, "Fecha de Emisión:")
+    c.drawRightString(550, 640, comprobante.fecha_emision.strftime('%Y-%m-%d %H:%M:%S'))
+    
+    # ID del comprobante
+    c.drawString(50, 620, "ID:")
+    c.drawRightString(550, 620, str(comprobante.idcomprobante))
+    
+    # Operación
+    c.drawString(50, 600, "Operación:")
+    c.drawRightString(550, 600, operacion.descripcion)
+    
+    # Cuenta
+    c.drawString(50, 580, "Cuenta:")
+    c.drawRightString(550, 580, f"{cuenta.num_ero_cuenta} ({cuenta.tipo_cuenta})")
+    
+    # Datos del cliente
+    c.drawString(50, 560, "Cliente:")
+    c.drawRightString(550, 560, f"{persona.apaterno} {persona.amaterno}")
+    
+    c.drawString(50, 540, "Documento:")
+    c.drawRightString(550, 540, f"{persona.tipo_documento} {persona.num_ero_documento}")
+    
+    c.drawString(50, 520, "Dirección:")
+    c.drawRightString(550, 520, persona.direccion)
+    
+    c.drawString(50, 500, "Teléfono:")
+    c.drawRightString(550, 500, persona.telefono)
+    
+    c.drawString(50, 480, "Email:")
+    c.drawRightString(550, 480, persona.email)
+    
+    # Línea decorativa
+    c.setStrokeColorRGB(0.8, 0.8, 0.8)  # Color gris claro
+    c.line(50, 460, 550, 460)
+    
+    # Pie de página
+    c.setFont("Helvetica-Bold", 12)
+    c.setFillColorRGB(0, 0, 0)  # Texto negro
+    c.drawString(50, 440, "comprobante de abono.")
+    
+    c.save()
+
+# Ejemplo de uso
+comprobante = Comprobante(1, datetime.now(), Decimal("100.00"), 1, 1, 1, 1)
+cuenta = Cuenta(1, "4557 1234 5678", "Soles", "Ahorros", 1, 1)
+persona = Persona(1, "Perez", "Rodriguez", "DNI", "12345678", "Av. Siempre Viva 123", "987654321", "perez@example.com")
+banco = Banco(1, "Banco del Sur", "Av. Siempre Viva 456")
+operacion = Operacion(1, "Abono a cuenta")
+
+# Ruta para guardar el PDF
+file_path = "comprobante_abono.pdf"
+
+# Generar y guardar el PDF
+generate_comprobante_pdf(comprobante, cuenta, persona, banco, operacion, file_path)
+
+print(f"PDF guardado en {file_path}")
